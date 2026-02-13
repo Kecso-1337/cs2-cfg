@@ -1756,7 +1756,9 @@
         </div>
 
         <!-- Clickable terminal body -->
-        <div class="terminal-body" id="launchOptionsBox" onclick="copyLaunchOptions()">
+        <div class="terminal-body" id="launchOptionsBox"
+             data-copy-label="Launch Options Copied!"
+             onclick="copyToClipboard(null, this)">
           <i class="fas fa-clipboard terminal-copy-icon" id="launchCopyIcon"></i>
           <div class="terminal-prompt" id="launchOptionsText">
             <span class="prompt-symbol"></span><span class="prompt-text placeholder">No launch options currently in use.</span>
@@ -1766,9 +1768,9 @@
     </div>
   </section>
 
-  <!-- Toast notification element -->
-  <div class="launch-toast" id="launchToast">
-    <i class="fas fa-check"></i> Copied to clipboard
+  <!-- Unified Copy Toast (shared by all copy actions) -->
+  <div class="launch-toast" id="copyToast">
+    <i class="fas fa-check"></i> <span id="copyToastMsg">Copied!</span>
   </div>
 
   <div class="container"><div class="divider"></div></div>
@@ -1795,8 +1797,10 @@
             <div class="crosshair-code-block">
               <div class="crosshair-header" style="border-radius:2px 2px 0 0; border:1px solid var(--border); border-bottom:none; padding:10px 16px;">Share Code</div>
               <div class="code-display">CSGO-TfGcY-dctVJ-RYcb3-y7xJY-h6LsE</div>
-              <button class="copy-btn" id="copyBtn" onclick="copyCode()">
-                <i class="fas fa-copy"></i>
+              <button class="copy-btn" id="copyBtn"
+                      data-copy-label="Crosshair Copied!"
+                      onclick="copyToClipboard('CSGO-TfGcY-dctVJ-RYcb3-y7xJY-h6LsE', this)">
+                <i class="fas fa-copy" id="crosshairIcon"></i>
                 <span id="copyText">Copy Crosshair Code</span>
               </button>
             </div>
@@ -1838,6 +1842,21 @@
                 <div class="vm-value">0</div>
                 <div class="vm-unit">value</div>
               </div>
+            </div>
+
+            <!-- Viewmodel Copy Row -->
+            <div class="terminal-body" id="vmOptionsBox"
+                 data-copy-label="Viewmodel Copied!"
+                 onclick="copyToClipboard('viewmodel_fov 68; viewmodel_offset_x 2; viewmodel_offset_y -2; viewmodel_offset_z -2; viewmodel_presetpos 3;', this)"
+                 style="border-top: 1px solid var(--border); padding: 18px 24px;">
+              <i class="fas fa-clipboard terminal-copy-icon" id="vmCopyIcon"></i>
+              <div class="terminal-prompt" id="vmOptionsText">
+                <span class="prompt-symbol">$</span><span class="prompt-text">viewmodel_fov 68; viewmodel_offset_x 2; viewmodel_offset_y -2; viewmodel_offset_z -2; viewmodel_presetpos 3;</span>
+              </div>
+            </div>
+            <div style="padding: 10px 24px 14px; border-top: 1px solid var(--border); display:flex; align-items:center; gap:6px;">
+              <i class="fas fa-clipboard" style="font-size:13px; color:var(--dim);"></i>
+              <span style="font-size:14px; letter-spacing:0.15em; text-transform:uppercase; color:var(--dim); font-weight:400; line-height:1.5;">Click to copy</span>
             </div>
           </div>
 
@@ -2359,67 +2378,83 @@
 
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-    /* ===== COPY CROSSHAIR CODE ===== */
-    function copyCode() {
-      const code = 'CSGO-TfGcY-dctVJ-RYcb3-y7xJY-h6LsE';
-      navigator.clipboard.writeText(code).then(() => {
-        const btn  = document.getElementById('copyBtn');
-        const text = document.getElementById('copyText');
-        btn.classList.add('copied');
-        text.textContent = 'Copied!';
-        setTimeout(() => {
-          btn.classList.remove('copied');
-          text.textContent = 'Copy Crosshair Code';
-        }, 2200);
-      });
-    }
+    /* ===== UNIFIED COPY HANDLER ===== */
+    // text  — string to copy; pass null for terminal-body rows to auto-read from .prompt-text
+    // el    — the clicked element; carries data-copy-label for the toast message
+    let copyResetTimer = null;
 
-    /* ===== COPY LAUNCH OPTIONS ===== */
-    function copyLaunchOptions() {
-      const textEl   = document.getElementById('launchOptionsText');
-      const iconEl   = document.getElementById('launchCopyIcon');
-      const toast    = document.getElementById('launchToast');
-      const box      = document.getElementById('launchOptionsBox');
+    function copyToClipboard(text, el) {
+      // Auto-read text from terminal rows if not explicitly provided
+      if (text === null) {
+        const promptEl = el.querySelector('.prompt-text');
+        const raw = promptEl ? promptEl.innerText.replace(/^\$\s*/, '').trim() : '';
+        text = (raw === 'No launch options currently in use.') ? '' : raw;
+      }
 
-      // Collect only the raw text content (strip HTML tags)
-      const raw = textEl.innerText.replace(/^\$\s*/,'').trim();
+      const label    = el.dataset.copyLabel || 'Copied!';
+      const toast    = document.getElementById('copyToast');
+      const toastMsg = document.getElementById('copyToastMsg');
+      const iconEl   = el.querySelector('.terminal-copy-icon') || null;
+      const isBtn    = el.tagName === 'BUTTON';
+      const btnText  = isBtn ? el.querySelector('[id$="copyText"], span:last-child') : null;
+      const btnIcon  = isBtn ? el.querySelector('i') : null;
 
-      // If placeholder, copy empty string but still give feedback
-      const toCopy = raw === 'No launch options currently in use.' ? '' : raw;
+      // Clear any pending reset from a previous click
+      if (copyResetTimer) clearTimeout(copyResetTimer);
 
-      navigator.clipboard.writeText(toCopy).then(() => {
-        // Icon feedback
-        iconEl.classList.remove('fa-clipboard');
-        iconEl.classList.add('fa-check');
-        iconEl.style.color = '#6ee7b7';
-        iconEl.style.opacity = '1';
+      const doFeedback = () => {
+        // ── Terminal-row feedback ──────────────────────────────────
+        if (iconEl) {
+          iconEl.classList.replace('fa-clipboard', 'fa-check');
+          iconEl.style.color   = '#6ee7b7';
+          iconEl.style.opacity = '1';
+          el.style.background  = 'rgba(110,231,183,0.04)';
+        }
 
-        // Box glow
-        box.style.background = 'rgba(110,231,183,0.04)';
+        // ── Button feedback ────────────────────────────────────────
+        if (isBtn) {
+          el.classList.add('copied');
+          if (btnText) btnText.textContent = label;
+          if (btnIcon) {
+            btnIcon.classList.replace('fa-copy', 'fa-check');
+          }
+        }
 
-        // Show toast
+        // ── Unified toast ──────────────────────────────────────────
+        toastMsg.textContent = label;
         toast.classList.add('show');
 
-        // Reset after 2s
-        setTimeout(() => {
-          iconEl.classList.remove('fa-check');
-          iconEl.classList.add('fa-clipboard');
-          iconEl.style.color = '';
-          iconEl.style.opacity = '';
-          box.style.background = '';
+        // ── Reset after 1.5 s ─────────────────────────────────────
+        copyResetTimer = setTimeout(() => {
+          if (iconEl) {
+            iconEl.classList.replace('fa-check', 'fa-clipboard');
+            iconEl.style.color   = '';
+            iconEl.style.opacity = '';
+            el.style.background  = '';
+          }
+          if (isBtn) {
+            el.classList.remove('copied');
+            if (btnText) btnText.textContent = 'Copy Crosshair Code';
+            if (btnIcon) btnIcon.classList.replace('fa-check', 'fa-copy');
+          }
           toast.classList.remove('show');
-        }, 2000);
-      }).catch(() => {
+          copyResetTimer = null;
+        }, 1500);
+      };
+
+      navigator.clipboard.writeText(text).then(doFeedback).catch(() => {
         // Fallback for older browsers
-        const sel = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(textEl);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        document.execCommand('copy');
-        sel.removeAllRanges();
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        try {
+          const sel   = window.getSelection();
+          const range = document.createRange();
+          const tmp   = document.createElement('textarea');
+          tmp.value   = text;
+          document.body.appendChild(tmp);
+          tmp.select();
+          document.execCommand('copy');
+          document.body.removeChild(tmp);
+        } catch (_) {}
+        doFeedback();
       });
     }
 
