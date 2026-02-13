@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CS2 Player Portfolio</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* ===== ROOT VARIABLES ===== */
+    :root {
+      --black:   #000000;
+      --deep:    #080808;
+      --surface: #0f0f0f;
+      --card:    #111111;
+      --border:  rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.14);
+      --white:   #ffffff;
+      --off-white: #c8c8c8;
+      --dim:     #666666;
+      --accent:  #e8d5a3;
+      --accent2: #8a7560;
+      --glow:    rgba(232,213,163,0.08);
+    }
+
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--black);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+      cursor: none;
+      font-size: 16px;
+    }
+
+    /* ===== CUSTOM CURSOR ===== */
+    .cursor-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.08s ease;
+    }
+    .cursor-ring {
+      width: 32px; height: 32px;
+      border: 1px solid rgba(232,213,163,0.5);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.18s ease, width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
+    }
+    a:hover ~ .cursor-ring, button:hover ~ .cursor-ring { width: 48px; height: 48px; }
+
+    /* ===== MOON CANVAS ===== */
+    #moonCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ===== STARFIELD CANVAS ===== */
+    #starfield {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===== NOISE OVERLAY ===== */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ===== LAYOUT ===== */
+    .container {
+      position: relative; z-index: 2;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    section { padding: 80px 0; }
+
+    /* ===== THIN HORIZONTAL DIVIDER ===== */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    }
+
+    /* ===== SECTION LABEL ===== */
+    .section-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent2), transparent);
+      max-width: 80px;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(32px, 5vw, 52px);
+      letter-spacing: 0.05em;
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 48px;
+    }
+
+    /* ===== HERO ===== */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      padding: 0;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .hero-tag {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+      line-height: 1.5;
+    }
+
+    .hero-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 9vw, 120px);
+      letter-spacing: 0.04em;
+      line-height: 0.92;
+      color: var(--white);
+      opacity: 0;
+      animation: fadeUp 0.8s 0.35s forwards;
+    }
+
+    .hero-name .accent-text {
+      color: transparent;
+      -webkit-text-stroke: 1px var(--accent);
+    }
+
+    .hero-role {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: var(--off-white);
+      opacity: 0;
+      animation: fadeUp 0.8s 0.5s forwards;
+      line-height: 1.6;
+    }
+
+    .hero-socials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 40px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.65s forwards;
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border: 1px solid var(--border-bright);
+      background: transparent;
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 2px;
+      cursor: none;
+      transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.2s;
+      line-height: 1.4;
+    }
+    .social-btn:hover {
+      background: rgba(232,213,163,0.06);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .social-btn i { font-size: 15px; }
+
+    /* Hero right — rank showcase */
+    .hero-right {
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+    }
+
+    .rank-showcase {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .rank-showcase::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .rank-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .rank-header-label {
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .rank-status {
+      width: 6px; height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #4ade80;
+      animation: pulse 2s infinite;
+    }
+
+    .rank-body {
+      padding: 28px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .rank-card {
+      background: var(--card);
+      padding: 24px;
+      text-align: center;
+      position: relative;
+      transition: background 0.25s;
+    }
+    .rank-card:hover { background: #161616; }
+
+    .rank-platform {
+      font-size: 14px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      font-weight: 500;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .rank-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 54px;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .rank-sub {
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 6px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .rank-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px 12px;
+      background: rgba(232,213,163,0.08);
+      border: 1px solid rgba(232,213,163,0.2);
+      border-radius: 2px;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .rank-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .rank-footer span {
+      font-size: 14px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      line-height: 1.5;
+    }
+
+    /* ===== CARDS GRID ===== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .setting-card {
+      background: var(--card);
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: background 0.2s;
+      position: relative;
+    }
+    .setting-card:hover { background: #141414; }
+    .setting-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 26px; right: 26px;
+      height: 1px;
+    }
+
+    .setting-key {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--off-white);
+      letter-spacing: 0.02em;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .setting-val {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-align: right;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .val-disabled { color: #555; }
+    .val-low { color: #c5a55a; }
+    .val-enabled { color: #6ee7b7; }
+    .val-quality { color: #93c5fd; }
+    .val-none { color: #555; }
+    .val-bilinear { color: var(--off-white); }
+
+    /* ===== CROSSHAIR ===== */
+    .crosshair-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .crosshair-preview-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .crosshair-preview-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .crosshair-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .crosshair-display {
+      padding: 48px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .crosshair-svg-wrap {
+      width: 80px; height: 80px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    .crosshair-code-block {
+      width: 100%;
+    }
+
+    .code-display {
+      background: #0a0a0a;
+      border: 1px solid var(--border-bright);
+      border-radius: 3px;
+      padding: 16px 18px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: var(--white);
+      word-break: break-all;
+      letter-spacing: 0.02em;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 12px 20px;
+      background: transparent;
+      border: 1px solid var(--border-bright);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 2px;
+      cursor: none;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      width: 100%;
+      justify-content: center;
+      line-height: 1.4;
+    }
+    .copy-btn:hover {
+      background: rgba(232,213,163,0.05);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      border-color: #4ade80;
+      color: #4ade80;
+      background: rgba(74,222,128,0.05);
+    }
+
+    /* ===== VIEWMODEL ===== */
+    .vm-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .vm-cell {
+      background: var(--card);
+      padding: 20px 22px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .vm-cell:hover { background: #141414; }
+
+    .vm-label {
+      font-size: 14px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      margin-bottom: 10px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .vm-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 0.05em;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .vm-unit {
+      font-size: 14px;
+      color: var(--off-white);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    /* ===== GEAR ===== */
+    .gear-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .gear-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.25s;
+    }
+    .gear-card:hover { border-color: var(--border-bright); }
+
+    .gear-card-head {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .gear-icon {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(232,213,163,0.06);
+      border: 1px solid rgba(232,213,163,0.12);
+      border-radius: 3px;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .gear-title {
+      font-size: 14px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .gear-name {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      padding: 16px 22px 0;
+      line-height: 1.5;
+    }
+
+    .gear-specs {
+      padding: 12px 22px 20px;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .spec-row:last-child { border-bottom: none; }
+
+    .spec-key {
+      font-size: 15px;
+      color: var(--off-white);
+      line-height: 1.6;
+    }
+
+    .spec-val {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--white);
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+
+    /* Monitor big card */
+    .gear-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .monitor-display {
+      padding: 24px 22px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .monitor-stat {
+      background: var(--card);
+      padding: 16px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .monitor-stat:hover { background: #141414; }
+
+    .monitor-stat-label {
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      margin-bottom: 8px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .monitor-stat-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      color: var(--white);
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+    }
+
+    .monitor-stat-unit {
+      font-size: 14px;
+      color: var(--off-white);
+      margin-top: 2px;
+      letter-spacing: 0.15em;
+      line-height: 1.5;
+    }
+
+    /* ===== MOUSE SETTINGS RING ===== */
+    .mouse-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      position: relative;
+      z-index: 2;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      line-height: 1.3;
+    }
+    .footer-brand span { color: var(--accent); }
+
+    .footer-note {
+      font-size: 14px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      line-height: 1.5;
+    }
+
+    /* ===== GAMMA STEP SELECTOR ===== */
+    .gamma-steps {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .gamma-step {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border-bright);
+      border-radius: 2px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--off-white);
+      letter-spacing: 0.04em;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+
+    .gamma-step.active {
+      background: rgba(232,213,163,0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ===== RGB PANEL ===== */
+    .rgb-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      width: 220px;
+    }
+
+    .rgb-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rgb-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      width: 16px;
+      text-align: center;
+      flex-shrink: 0;
+      line-height: 1.2;
+    }
+
+    .rgb-bar-wrap {
+      flex: 1;
+      height: 5px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .rgb-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .rgb-num {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.04em;
+      width: 30px;
+      text-align: right;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 640px) {
+      .rgb-panel { width: 180px; }
+      .gamma-step { width: 28px; height: 28px; font-size: 14px; }
+    }
+
+    /* ===== MONITOR OSD SETTINGS ===== */
+    .monitor-osd {
+      padding: 0 22px 22px;
+    }
+
+    .osd-group-label {
+      font-size: 14px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      padding: 18px 0 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2px;
+      line-height: 1.5;
+    }
+
+    .osd-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .osd-row:last-child { border-bottom: none; }
+
+    .osd-key {
+      font-size: 15px;
+      color: var(--off-white);
+      flex-shrink: 0;
+      min-width: 180px;
+      line-height: 1.6;
+    }
+
+    .osd-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .osd-val {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      line-height: 1.5;
+    }
+
+    .osd-val.premium { color: var(--accent); }
+    .osd-val.on      { color: #6ee7b7; }
+    .osd-val.off     { color: #444; }
+    .osd-val.high    { color: #fbbf24; }
+
+    /* Numeric progress bar */
+    .osd-bar-wrap {
+      flex: 1;
+      max-width: 120px;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .osd-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 0%;
+    }
+
+    /* ===== PC BUILD ===== */
+    .pc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .pc-component {
+      background: var(--card);
+      padding: 24px 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      transition: background 0.2s;
+    }
+    .pc-component:hover { background: #141414; }
+    .pc-component.full  { grid-column: 1 / -1; }
+
+    .pc-icon-wrap {
+      width: 40px; height: 40px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(232,213,163,0.05);
+      border: 1px solid rgba(232,213,163,0.1);
+      border-radius: 3px;
+      font-size: 16px;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .pc-info { flex: 1; }
+
+    .pc-label {
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .pc-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.01em;
+      line-height: 1.5;
+    }
+
+    .pc-detail {
+      font-size: 15px;
+      color: var(--off-white);
+      margin-top: 6px;
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+
+    .pc-badge {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 5px 12px;
+      background: rgba(232,213,163,0.06);
+      border: 1px solid rgba(232,213,163,0.14);
+      border-radius: 2px;
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 640px) {
+      .pc-grid { grid-template-columns: 1fr; }
+      .pc-component.full { grid-column: 1; }
+      .osd-key { min-width: 120px; }
+      .osd-bar-wrap { max-width: 70px; }
+    }
+
+    /* ===== STEAM PROFILE CARD ===== */
+    .steam-card {
+      margin-top: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.3s ease;
+    }
+    .steam-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(103,193,245,0.6), transparent);
+    }
+    .steam-card:hover {
+      border-color: rgba(103,193,245,0.25);
+    }
+
+    .steam-card-header {
+      padding: 16px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .steam-card-label {
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .steam-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(103,193,245,0.8);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .steam-logo i { font-size: 15px; }
+
+    .steam-card-body {
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* Avatar */
+    .steam-avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .steam-avatar-ring {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(103,193,245,0.45), rgba(103,193,245,0.08));
+      position: relative;
+    }
+    .steam-avatar-ring::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: transparent;
+      box-shadow: 0 0 16px rgba(103,193,245,0.22), 0 0 6px rgba(103,193,245,0.12);
+      pointer-events: none;
+    }
+    .steam-avatar {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.18);
+      display: block;
+      background: #1a1a2e;
+    }
+
+    /* Online badge */
+    .steam-online-badge {
+      position: absolute;
+      bottom: 2px; right: 2px;
+      width: 15px; height: 15px;
+      background: #4ade80;
+      border-radius: 50%;
+      border: 2px solid var(--card);
+      box-shadow: 0 0 8px rgba(74,222,128,0.7);
+      animation: pulse 2.2s infinite;
+    }
+    .steam-online-badge::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* Info block */
+    .steam-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .steam-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .steam-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.5;
+    }
+    .steam-verified-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      background: rgba(74,222,128,0.1);
+      border: 1px solid rgba(74,222,128,0.25);
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #4ade80;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.3;
+    }
+    .steam-verified-chip::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 5px #4ade80;
+      animation: pulse 2.2s infinite;
+    }
+    .steam-status {
+      font-size: 15px;
+      color: var(--off-white);
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+    .steam-view-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(103,193,245,0.07);
+      border: 1px solid rgba(103,193,245,0.25);
+      color: rgba(103,193,245,0.95);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 2px;
+      cursor: none;
+      transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.2s;
+      line-height: 1.4;
+    }
+    .steam-view-btn:hover {
+      background: rgba(103,193,245,0.14);
+      border-color: rgba(103,193,245,0.55);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .steam-view-btn i { font-size: 15px; }
+
+    /* Enhanced hero section atmospheric glow */
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 110%, rgba(232,213,163,0.03) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ===== NAVBAR ===== */
+    #navbar {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: calc(100% - 48px);
+      max-width: 900px;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 52px;
+      background: rgba(8, 8, 8, 0.72);
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 4px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+    }
+
+    .nav-inner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,213,163,0.45), transparent);
+      border-radius: 1px;
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-decoration: none;
+      flex-shrink: 0;
+      cursor: none;
+      line-height: 1.3;
+    }
+    .nav-brand span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      display: block;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      text-decoration: none;
+      border-radius: 2px;
+      position: relative;
+      transition: color 0.22s ease;
+      cursor: none;
+      line-height: 1.4;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 3px; left: 12px; right: 12px;
+      height: 1px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a.active { color: var(--white); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    /* Hamburger */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: none;
+      padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 20px; height: 1px;
+      background: var(--off-white);
+      border-radius: 1px;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    /* Mobile dropdown */
+    .nav-mobile {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0; right: 0;
+      background: rgba(9,9,9,0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.8);
+      animation: dropIn 0.22s ease forwards;
+    }
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .nav-mobile.open { display: block; }
+    .nav-mobile a {
+      display: block;
+      padding: 16px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: color 0.2s, background 0.2s;
+      cursor: none;
+      line-height: 1.5;
+    }
+    .nav-mobile a:last-child { border-bottom: none; }
+    .nav-mobile a:hover { color: var(--white); background: rgba(255,255,255,0.02); }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      #navbar { top: 14px; width: calc(100% - 28px); }
+    }
+
+    #hero { padding-top: 110px; }
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(20px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes spin-slow {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 860px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+      .crosshair-section { grid-template-columns: 1fr; }
+      .gear-grid { grid-template-columns: 1fr; }
+      .monitor-display { grid-template-columns: repeat(3, 1fr); }
+      .gear-card.full-width { grid-column: 1; }
+      .vm-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 540px) {
+      .monitor-display { grid-template-columns: repeat(2, 1fr); }
+      .vm-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <!-- Brand -->
+      <a href="#hero" class="nav-brand">All Things</span></a>
+
+      <!-- Desktop links -->
+      <ul class="nav-links">
+        <li><a href="#hero"       data-section="hero">About Me</a></li>
+        <li><a href="#video"      data-section="video">Video Settings</a></li>
+        <li><a href="#crosshair"  data-section="crosshair">Crosshair</a></li>
+        <li><a href="#gear"       data-section="gear">Gear &amp; Setup</a></li>
+        <li><a href="#pc"         data-section="pc">PC Build</a></li>
+      </ul>
+
+      <!-- Mobile hamburger -->
+      <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Mobile dropdown -->
+      <div class="nav-mobile" id="navMobile">
+        <a href="#hero"      onclick="closeMobile()">About Me</a>
+        <a href="#video"     onclick="closeMobile()">Video Settings</a>
+        <a href="#crosshair" onclick="closeMobile()">Crosshair &amp; Gameplay</a>
+        <a href="#gear"      onclick="closeMobile()">Gear &amp; Setup</a>
+        <a href="#pc"        onclick="closeMobile()">PC Build</a>
+      </div>
+    </div>
+  </nav>
+  <canvas id="moonCanvas"></canvas>
+  <canvas id="starfield"></canvas>
+
+  <!-- ===== HERO ===== -->
+  <section id="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <!-- Left -->
+        <div>
+          <div class="hero-tag">Counter-Strike 2 &nbsp;/&nbsp; Casual Player</div>
+          <h1 class="hero-name">
+            <span>Kecso</span><br>
+            <span class="accent-text"></span>
+          </h1>
+          <p class="hero-role">Rifler &nbsp;·&nbsp; Aimlock &nbsp;·&nbsp; Lurker &nbsp;·&nbsp; Main Team — Open to orgs</p>
+
+          <div class="hero-socials">
+            <a href="https://www.twitch.tv/kecso1337" class="social-btn"><i class="fab fa-twitch"></i> Twitch</a>
+            <a href="https://www.youtube.com/@kecso1337" class="social-btn"><i class="fab fa-youtube"></i> YouTube</a>
+            <a href="https://steamcommunity.com/id/kecso1337/" class="social-btn"><i class="fab fa-steam"></i> Steam</a>
+            <a href="https://www.faceit.com/hu/players/realscr1pt-" class="social-btn"><i class="fas fa-gamepad"></i> Faceit</a>
+            <a href="https://play.esea.net/users/2662770" class="social-btn"><i class="fas fa-trophy"></i> ESEA</a>
+            <a href="https://esportal.com/en/profile/Kecso/" class="social-btn"><i class="fas fa-globe"></i> Esportal</a>
+          </div>
+        </div>
+
+        <!-- Right: Rank Showcase -->
+        <div class="hero-right">
+          <div class="rank-showcase">
+            <div class="rank-header">
+              <span class="rank-header-label">Current Rankings</span>
+              <span class="rank-status"></span>
+            </div>
+            <div class="rank-body">
+              <div class="rank-card">
+                <div class="rank-platform">CS2 Premier</div>
+                <div class="rank-number">30 902</div>
+                <div class="rank-sub">Peak ELO</div>
+                <span class="rank-badge">Global Elite</span>
+              </div>
+              <div class="rank-card">
+                <div class="rank-platform">Faceit</div>
+                <div class="rank-number">2 854</div>
+                <div class="rank-sub">Peak ELO</div>
+                <span class="rank-badge">Level 10</span>
+              </div>
+            </div>
+            <div class="rank-footer">
+              <span>Peak stats — Season 2024/25</span>
+            </div>
+          </div>
+          <!-- Steam Profile Card -->
+          <div class="steam-card">
+            <div class="steam-card-header">
+              <span class="steam-card-label">Steam Profile</span>
+              <span class="steam-logo"><i class="fab fa-steam"></i> Steam</span>
+            </div>
+            <div class="steam-card-body">
+              <div class="steam-avatar-wrap">
+                <div class="steam-avatar-ring">
+                  <img src="https://avatars.akamai.steamstatic.com/b5efdf3c496fb4e5255f6eac5889102d9f8e4157_full.jpg" alt="Steam Avatar" class="steam-avatar">
+                </div>
+                <div class="steam-online-badge"></div>
+              </div>
+              <div class="steam-info">
+                <div class="steam-name-row">
+                  <span class="steam-name">Kecso</span>
+                  <span class="steam-verified-chip">Online</span>
+                </div>
+                <div class="steam-status">CS2 &nbsp;·&nbsp; In-game</div>
+                <a href="https://steamcommunity.com/id/kecso1337" class="steam-view-btn" target="_blank" rel="noopener">
+                  <i class="fab fa-steam"></i> View Profile
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><div class="divider"></div></div>
+
+  <!-- ===== VIDEO SETTINGS ===== -->
+  <section id="video">
+    <div class="container reveal">
+      <div class="section-label">Config</div>
+      <h2 class="section-title">Video Settings</h2>
+
+      <div class="cards-grid">
+        <div class="setting-card">
+          <span class="setting-key">Boost Player Contrast</span>
+          <span class="setting-val val-disabled">Enabled</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Wait for Vertical Sync</span>
+          <span class="setting-val val-disabled">Disabled</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Multisampling Anti-Aliasing</span>
+          <span class="setting-val val-none">CMAA2</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Global Shadow Quality</span>
+          <span class="setting-val val-low">Low</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Model / Texture Detail</span>
+          <span class="setting-val val-low">Low</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Texture Filtering Mode</span>
+          <span class="setting-val val-bilinear">Bilinear</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Shader Detail</span>
+          <span class="setting-val val-low">Low</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Particle Detail</span>
+          <span class="setting-val val-low">Low</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">Ambient Occlusion</span>
+          <span class="setting-val val-disabled">Disabled</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">High Dynamic Range</span>
+          <span class="setting-val val-quality">Quality</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">FidelityFX Super Resolution</span>
+          <span class="setting-val val-disabled">Disabled (Highest Quality)</span>
+        </div>
+        <div class="setting-card">
+          <span class="setting-key">NVIDIA Reflex Low Latency</span>
+          <span class="setting-val val-enabled">Enabled</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><div class="divider"></div></div>
+
+  <!-- ===== CROSSHAIR & VIEWMODEL ===== -->
+  <section id="crosshair">
+    <div class="container reveal">
+      <div class="section-label">In-Game</div>
+      <h2 class="section-title">Crosshair &amp; Gameplay</h2>
+
+      <div class="crosshair-section">
+        <!-- Crosshair Preview -->
+        <div class="crosshair-preview-card">
+          <div class="crosshair-header">Crosshair Preview</div>
+          <div class="crosshair-display">
+            <div class="crosshair-svg-wrap">
+              <div style="
+                width: 6px; height: 6px;
+                background: #ffffff;
+                border-radius: 0;
+                image-rendering: pixelated;
+              "></div>
+            </div>
+            <div class="crosshair-code-block">
+              <div class="crosshair-header" style="border-radius:2px 2px 0 0; border:1px solid var(--border); border-bottom:none; padding:10px 16px;">Share Code</div>
+              <div class="code-display">CSGO-TfGcY-dctVJ-RYcb3-y7xJY-h6LsE</div>
+              <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+                <i class="fas fa-copy"></i>
+                <span id="copyText">Copy Crosshair Code</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viewmodel -->
+        <div>
+          <div class="crosshair-preview-card" style="margin-bottom: 20px;">
+            <div class="crosshair-header">Viewmodel Settings</div>
+            <div class="vm-grid" style="margin: 0; border-radius: 0; border: none; border-top: 1px solid var(--border);">
+              <div class="vm-cell">
+                <div class="vm-label">FOV</div>
+                <div class="vm-value">68</div>
+                <div class="vm-unit">degrees</div>
+              </div>
+              <div class="vm-cell">
+                <div class="vm-label">Offset X</div>
+                <div class="vm-value">2</div>
+                <div class="vm-unit">units</div>
+              </div>
+              <div class="vm-cell">
+                <div class="vm-label">Offset Y</div>
+                <div class="vm-value">-2</div>
+                <div class="vm-unit">units</div>
+              </div>
+              <div class="vm-cell">
+                <div class="vm-label">Offset Z</div>
+                <div class="vm-value">-2</div>
+                <div class="vm-unit">units</div>
+              </div>
+              <div class="vm-cell">
+                <div class="vm-label">Presetpos</div>
+                <div class="vm-value">3</div>
+                <div class="vm-unit">classic</div>
+              </div>
+              <div class="vm-cell">
+                <div class="vm-label">Bob amt</div>
+                <div class="vm-value">0</div>
+                <div class="vm-unit">value</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><div class="divider"></div></div>
+
+  <!-- ===== GEAR / MONITOR ===== -->
+  <section id="gear">
+    <div class="container reveal">
+      <div class="section-label">Hardware</div>
+      <h2 class="section-title">Gear &amp; Setup</h2>
+
+      <div class="gear-grid">
+        <!-- Monitor full width -->
+        <div class="gear-card full-width">
+          <div class="gear-card-head">
+            <div class="gear-icon"><i class="fas fa-desktop"></i></div>
+            <span class="gear-title">Monitor</span>
+          </div>
+          <div class="gear-name">Zowie XL2546K</div>
+
+          <!-- Top quick-stat bar -->
+          <div class="monitor-display">
+            <div class="monitor-stat">
+              <div class="monitor-stat-label">Refresh Rate</div>
+              <div class="monitor-stat-val">240</div>
+              <div class="monitor-stat-unit">Hz</div>
+            </div>
+            <div class="monitor-stat">
+              <div class="monitor-stat-label">Resolution</div>
+              <div class="monitor-stat-val">1920x1080</div>
+              <div class="monitor-stat-unit">Stretched</div>
+            </div>
+            <div class="monitor-stat">
+              <div class="monitor-stat-label">Panel</div>
+              <div class="monitor-stat-val">TN</div>
+              <div class="monitor-stat-unit">Fast TN</div>
+            </div>
+            <div class="monitor-stat">
+              <div class="monitor-stat-label">Response</div>
+              <div class="monitor-stat-val">0.5</div>
+              <div class="monitor-stat-unit">ms GTG</div>
+            </div>
+            <div class="monitor-stat">
+              <div class="monitor-stat-label">Size</div>
+              <div class="monitor-stat-val">24.5"</div>
+              <div class="monitor-stat-unit">Inch</div>
+            </div>
+          </div>
+
+          <!-- OSD Detailed Settings -->
+          <div class="monitor-osd">
+
+            <div class="osd-group-label">Motion &amp; Clarity</div>
+
+            <div class="osd-row">
+              <span class="osd-key">DyAc+</span>
+              <div class="osd-right">
+                <span class="osd-val premium">Premium</span>
+              </div>
+            </div>
+            <div class="osd-row">
+              <span class="osd-key">AMA</span>
+              <div class="osd-right">
+                <span class="osd-val premium">Premium</span>
+              </div>
+            </div>
+
+            <div class="osd-group-label">Picture Quality</div>
+
+            <div class="osd-row">
+              <span class="osd-key">Brightness</span>
+              <div class="osd-right">
+                <div class="osd-bar-wrap"><div class="osd-bar-fill" data-pct="80"></div></div>
+                <span class="osd-val">88 <span style="color:var(--dim);font-weight:400;font-size:10px">/ 100</span></span>
+              </div>
+            </div>
+            <div class="osd-row">
+              <span class="osd-key">Contrast</span>
+              <div class="osd-right">
+                <div class="osd-bar-wrap"><div class="osd-bar-fill" data-pct="50"></div></div>
+                <span class="osd-val">50 <span style="color:var(--dim);font-weight:400;font-size:10px">/ 100</span></span>
+              </div>
+            </div>
+            <div class="osd-row">
+              <span class="osd-key">Sharpness</span>
+              <div class="osd-right">
+                <div class="osd-bar-wrap"><div class="osd-bar-fill" data-pct="10"></div></div>
+                <span class="osd-val">10 <span style="color:var(--dim);font-weight:400;font-size:10px">/ 100</span></span>
+              </div>
+            </div>
+            <div class="osd-row">
+              <span class="osd-key">Black eQualizer</span>
+              <div class="osd-right">
+                <div class="osd-bar-wrap"><div class="osd-bar-fill" data-pct="60"></div></div>
+                <span class="osd-val">0 <span style="color:var(--dim);font-weight:400;font-size:10px">/ 20</span></span>
+              </div>
+            </div>
+            <div class="osd-row">
+              <span class="osd-key">Color Vibrance</span>
+              <div class="osd-right">
+                <div class="osd-bar-wrap"><div class="osd-bar-fill" data-pct="75"></div></div>
+                <span class="osd-val">15 <span style="color:var(--dim);font-weight:400;font-size:10px">/ 20</span></span>
+              </div>
+            </div>
+
+            <div class="osd-group-label">Color Calibration</div>
+
+            <!-- Gamma step selector -->
+            <div class="osd-row" style="align-items:center;">
+              <span class="osd-key">Gamma</span>
+              <div class="osd-right">
+                <div class="gamma-steps">
+                  <span class="gamma-step">1</span>
+                  <span class="gamma-step active">2</span>
+                  <span class="gamma-step">3</span>
+                  <span class="gamma-step">4</span>
+                  <span class="gamma-step">5</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Color Temperature: User Mode -->
+            <div class="osd-row" style="align-items:flex-start; padding-top:14px; padding-bottom:14px;">
+              <span class="osd-key" style="padding-top:4px;">Color Temperature</span>
+              <div class="osd-right" style="flex-direction:column; align-items:flex-end; gap:10px;">
+                <span class="osd-val premium" style="font-size:10px; letter-spacing:0.2em;">USER MODE</span>
+                <div class="rgb-panel">
+                  <!-- R -->
+                  <div class="rgb-row">
+                    <span class="rgb-label" style="color:#ef4444;">R</span>
+                    <div class="rgb-bar-wrap">
+                      <div class="rgb-bar-fill" data-pct="96" style="background: linear-gradient(90deg, #7f1d1d, #ef4444);"></div>
+                    </div>
+                    <span class="rgb-num">96</span>
+                  </div>
+                  <!-- G -->
+                  <div class="rgb-row">
+                    <span class="rgb-label" style="color:#4ade80;">G</span>
+                    <div class="rgb-bar-wrap">
+                      <div class="rgb-bar-fill" data-pct="98" style="background: linear-gradient(90deg, #14532d, #4ade80);"></div>
+                    </div>
+                    <span class="rgb-num">100</span>
+                  </div>
+                  <!-- B -->
+                  <div class="rgb-row">
+                    <span class="rgb-label" style="color:#60a5fa;">B</span>
+                    <div class="rgb-bar-wrap">
+                      <div class="rgb-bar-fill" data-pct="100" style="background: linear-gradient(90deg, #1e3a5f, #60a5fa);"></div>
+                    </div>
+                    <span class="rgb-num">99</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="osd-row">
+              <span class="osd-key">Low Blue Light</span>
+              <div class="osd-right">
+                <div class="osd-bar-wrap"><div class="osd-bar-fill" data-pct="0"></div></div>
+                <span class="osd-val off">0 <span style="color:var(--dim);font-weight:400;font-size:10px">/ 10</span></span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Mouse -->
+        <div class="gear-card">
+          <div class="gear-card-head">
+            <div class="gear-icon"><i class="fas fa-mouse-pointer"></i></div>
+            <span class="gear-title">Mouse</span>
+          </div>
+          <div class="gear-name">Logitech G Pro Superlight 2</div>
+          <div class="gear-specs">
+            <div class="spec-row">
+              <span class="spec-key">DPI</span>
+              <span class="spec-val">1600</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Polling Rate</span>
+              <span class="spec-val">4000 Hz</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">CS2 Sensitivity</span>
+              <span class="spec-val">0.53</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">eDPI</span>
+              <span class="spec-val">848</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Windows Sensitivity</span>
+              <span class="spec-val">6 / 11</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Acceleration</span>
+              <span class="spec-val">Off</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyboard -->
+        <div class="gear-card">
+          <div class="gear-card-head">
+            <div class="gear-icon"><i class="fas fa-keyboard"></i></div>
+            <span class="gear-title">Keyboard</span>
+          </div>
+          <div class="gear-name">Placeholder Keyboard Model</div>
+          <div class="gear-specs">
+            <div class="spec-row">
+              <span class="spec-key">Switch Type</span>
+              <span class="spec-val">OmniPoint 2.0 magnetic (Hall-effect) switches</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Form Factor</span>
+              <span class="spec-val">TKL</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Polling Rate</span>
+              <span class="spec-val">1000 Hz</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Headset -->
+        <div class="gear-card">
+          <div class="gear-card-head">
+            <div class="gear-icon"><i class="fas fa-headphones"></i></div>
+            <span class="gear-title">Headset</span>
+          </div>
+          <div class="gear-name">Logitech G Pro X Gaming</div>
+          <div class="gear-specs">
+            <div class="spec-row">
+              <span class="spec-key">Connection</span>
+              <span class="spec-val">USB or 3.5 mm with included adapters/cables</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Driver Size</span>
+              <span class="spec-val">50 mm hybrid mesh PRO-G drivers</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Mic</span>
+              <span class="spec-val">Unidirectional cardioid</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mousepad -->
+        <div class="gear-card">
+          <div class="gear-card-head">
+            <div class="gear-icon"><i class="fas fa-expand"></i></div>
+            <span class="gear-title">Mousepad</span>
+          </div>
+          <div class="gear-name">SteelSeries QCK Heavy XXL</div>
+          <div class="gear-specs">
+            <div class="spec-row">
+              <span class="spec-key">Size</span>
+              <span class="spec-val">900 × 400 mm</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Surface</span>
+              <span class="spec-val">Classic micro-woven cloth, balanced glide and control</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Thickness</span>
+              <span class="spec-val">4 mm</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><div class="divider"></div></div>
+
+  <!-- ===== PC BUILD ===== -->
+  <section id="pc">
+    <div class="container reveal">
+      <div class="section-label">The Machine</div>
+      <h2 class="section-title">PC Build</h2>
+
+      <div class="pc-grid">
+
+        <!-- CPU -->
+        <div class="pc-component">
+          <div class="pc-icon-wrap"><i class="fas fa-microchip"></i></div>
+          <div class="pc-info">
+            <div class="pc-label">Processor</div>
+            <div class="pc-name">Intel Core i9-11900K</div>
+            <div class="pc-detail">8 Cores &nbsp;·&nbsp; Up to 5.3 GHz</div>
+            <span class="pc-badge">Rocket Lake-S</span>
+          </div>
+        </div>
+
+        <!-- GPU -->
+        <div class="pc-component">
+          <div class="pc-icon-wrap"><i class="fas fa-tv"></i></div>
+          <div class="pc-info">
+            <div class="pc-label">Graphics Card</div>
+            <div class="pc-name">GeForce RTX™ 3080 GAMING X TRIO 10G</div>
+            <div class="pc-detail">10 GB GDDR6X &nbsp;·&nbsp; Ampere architecture</div>
+            <span class="pc-badge">Ampere architecture</span>
+          </div>
+        </div>
+
+        <!-- RAM -->
+        <div class="pc-component">
+          <div class="pc-icon-wrap"><i class="fas fa-memory"></i></div>
+          <div class="pc-info">
+            <div class="pc-label">Memory</div>
+            <div class="pc-name">Kingston FURY Beast 32GB (2x16GB) DDR4 3200MHz CL15</div>
+            <div class="pc-detail">Dual Channel &nbsp;·&nbsp; XMP 2.0 Profile</div>
+            <span class="pc-badge">DDR4</span>
+          </div>
+        </div>
+
+        <!-- Motherboard -->
+        <div class="pc-component">
+          <div class="pc-icon-wrap"><i class="fas fa-server"></i></div>
+          <div class="pc-info">
+            <div class="pc-label">Motherboard</div>
+            <div class="pc-name">MSI Z590-A PRO</div>
+            <div class="pc-detail">LGA1200 &nbsp;·&nbsp; Intel Z590 Chipset</div>
+            <span class="pc-badge">ATX</span>
+          </div>
+        </div>
+
+        <!-- Storage full width -->
+        <div class="pc-component full">
+          <div class="pc-icon-wrap"><i class="fas fa-hdd"></i></div>
+          <div class="pc-info">
+            <div class="pc-label">Primary Storage</div>
+            <div class="pc-name">Western Digital SN850X 1TB M.2</div>
+            <div class="pc-detail">PCIe 4.0 x4 &nbsp;·&nbsp; Read: 7 300 MB/s &nbsp;·&nbsp; Write: 6 300 MB/s &nbsp;·&nbsp; M.2 2280</div>
+            <span class="pc-badge">NVMe Gen 4</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><div class="divider"></div></div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">Kecso</span></div>
+        <div class="footer-note">My Personal Settings &nbsp;·&nbsp; 2026</div>
+        <div class="footer-note">Settings may change without notice</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== CUSTOM CURSOR ===== */
+    const dot  = document.getElementById('cursorDot');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left  = mx + 'px';
+      dot.style.top   = my + 'px';
+    });
+
+    (function animRing() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animRing);
+    })();
+
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        ring.style.width  = '48px';
+        ring.style.height = '48px';
+        ring.style.borderColor = 'rgba(232,213,163,0.8)';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width  = '32px';
+        ring.style.height = '32px';
+        ring.style.borderColor = 'rgba(232,213,163,0.5)';
+      });
+    });
+
+    /* ===== NAVBAR BEHAVIOUR ===== */
+    (function initNavbar() {
+      const hamburger  = document.getElementById('navHamburger');
+      const mobileMenu = document.getElementById('navMobile');
+
+      hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open');
+      });
+
+      window.closeMobile = function() {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+      };
+
+      // Active section spy
+      const sections   = document.querySelectorAll('section[id]');
+      const navAnchors = document.querySelectorAll('.nav-links a[data-section]');
+
+      const spy = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            navAnchors.forEach(a => {
+              a.classList.toggle('active', a.dataset.section === entry.target.id);
+            });
+          }
+        });
+      }, { rootMargin: '-35% 0px -60% 0px', threshold: 0 });
+
+      sections.forEach(s => spy.observe(s));
+
+      // Smooth scroll for nav links
+      document.querySelectorAll('#navbar a[href^="#"]').forEach(link => {
+        link.addEventListener('click', e => {
+          const id = link.getAttribute('href');
+          const target = document.querySelector(id);
+          if (target) {
+            e.preventDefault();
+            const top = target.getBoundingClientRect().top + window.scrollY - 76;
+            window.scrollTo({ top, behavior: 'smooth' });
+            closeMobile();
+          }
+        });
+      });
+
+      // Navbar border opacity on scroll
+      const navInner = document.querySelector('.nav-inner');
+      window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY > 60;
+        navInner.style.background = scrolled
+          ? 'rgba(4,4,4,0.92)'
+          : 'rgba(8,8,8,0.72)';
+        navInner.style.boxShadow = scrolled
+          ? '0 12px 48px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)'
+          : '0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)';
+      }, { passive: true });
+    })();
+
+    /* ===== STARFIELD ===== */
+    (function initStarfield() {
+      const canvas = document.getElementById('starfield');
+      const ctx    = canvas.getContext('2d');
+      let W, H, stars = [];
+
+      function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      function mkStar() {
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 0.9 + 0.1,
+          a: Math.random(),
+          spd: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        };
+      }
+
+      function init() {
+        resize();
+        stars = Array.from({ length: 260 }, mkStar);
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach(s => {
+          s.a += s.spd * s.dir;
+          if (s.a > 1 || s.a < 0) s.dir *= -1;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${s.a * 0.55})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => { resize(); });
+      init();
+      draw();
+    })();
+
+    /* ===== SCROLL REVEAL ===== */
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          // Animate any OSD progress bars inside this section
+          e.target.querySelectorAll('.osd-bar-fill[data-pct], .rgb-bar-fill[data-pct]').forEach(bar => {
+            setTimeout(() => {
+              bar.style.width = bar.dataset.pct + '%';
+            }, 200);
+          });
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    /* ===== COPY CROSSHAIR CODE ===== */
+    function copyCode() {
+      const code = 'CSGO-TfGcY-dctVJ-RYcb3-y7xJY-h6LsE';
+      navigator.clipboard.writeText(code).then(() => {
+        const btn  = document.getElementById('copyBtn');
+        const text = document.getElementById('copyText');
+        btn.classList.add('copied');
+        text.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          text.textContent = 'Copy Crosshair Code';
+        }, 2200);
+      });
+    }
+
+    /* ===== MOON ANIMATION ===== */
+    (function initMoon() {
+      const canvas = document.getElementById('moonCanvas');
+      const ctx    = canvas.getContext('2d');
+      let W, H;
+
+      // Moon state — traverses slowly from right to left over ~240 seconds
+      const MOON_R   = 72;      // px radius
+      const SPEED_X  = 0.06;    // px per frame horizontal drift
+      const SPEED_Y  = 0.008;   // gentle vertical float
+      let moonX, moonY;
+      let glowPulse  = 0;
+      let glowDir    = 1;
+
+      function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+        // Start moon at right side, upper quarter of screen
+        moonX = W * 0.78;
+        moonY = H * 0.18;
+      }
+
+      function drawMoon(x, y, r, glow) {
+        ctx.save();
+
+        // Outer atmospheric glow
+        const atmoGrad = ctx.createRadialGradient(x, y, r * 0.9, x, y, r * 2.8);
+        atmoGrad.addColorStop(0,   `rgba(220,215,190,${0.055 + glow * 0.028})`);
+        atmoGrad.addColorStop(0.4, `rgba(200,195,170,${0.022 + glow * 0.01})`);
+        atmoGrad.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.beginPath();
+        ctx.arc(x, y, r * 2.8, 0, Math.PI * 2);
+        ctx.fillStyle = atmoGrad;
+        ctx.fill();
+
+        // Inner soft corona
+        const coronaGrad = ctx.createRadialGradient(x, y, r * 0.7, x, y, r * 1.45);
+        coronaGrad.addColorStop(0,   `rgba(245,240,220,${0.09 + glow * 0.04})`);
+        coronaGrad.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.beginPath();
+        ctx.arc(x, y, r * 1.45, 0, Math.PI * 2);
+        ctx.fillStyle = coronaGrad;
+        ctx.fill();
+
+        // Moon sphere gradient (lit from upper-left)
+        const moonGrad = ctx.createRadialGradient(
+          x - r * 0.28, y - r * 0.32, r * 0.05,
+          x + r * 0.12, y + r * 0.12, r * 1.0
+        );
+        moonGrad.addColorStop(0,    'rgba(250,246,235,0.98)');
+        moonGrad.addColorStop(0.35, 'rgba(230,225,210,0.96)');
+        moonGrad.addColorStop(0.72, 'rgba(195,190,175,0.93)');
+        moonGrad.addColorStop(1,    'rgba(155,150,138,0.90)');
+
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = moonGrad;
+        ctx.fill();
+
+        // Dark limb shading (right + bottom edge)
+        const limbGrad = ctx.createRadialGradient(
+          x + r * 0.3, y + r * 0.3, r * 0.4,
+          x + r * 0.3, y + r * 0.3, r * 1.1
+        );
+        limbGrad.addColorStop(0,   'rgba(0,0,0,0)');
+        limbGrad.addColorStop(0.6, 'rgba(0,0,0,0.08)');
+        limbGrad.addColorStop(1,   'rgba(0,0,0,0.32)');
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = limbGrad;
+        ctx.fill();
+
+        // ——— Craters ———
+        const craters = [
+          { dx: -0.28, dy: -0.12, sr: 0.18, alpha: 0.11 },
+          { dx:  0.18, dy:  0.32, sr: 0.14, alpha: 0.09 },
+          { dx: -0.08, dy:  0.18, sr: 0.09, alpha: 0.08 },
+          { dx:  0.30, dy: -0.25, sr: 0.11, alpha: 0.10 },
+          { dx: -0.40, dy:  0.30, sr: 0.08, alpha: 0.07 },
+          { dx:  0.10, dy: -0.40, sr: 0.07, alpha: 0.08 },
+          { dx: -0.15, dy:  0.42, sr: 0.06, alpha: 0.06 },
+          { dx:  0.42, dy:  0.10, sr: 0.10, alpha: 0.08 },
+        ];
+
+        craters.forEach(c => {
+          const cx = x + c.dx * r;
+          const cy = y + c.dy * r;
+          const cr = c.sr * r;
+
+          // Crater shadow
+          const cGrad = ctx.createRadialGradient(cx - cr * 0.2, cy - cr * 0.2, 0, cx, cy, cr);
+          cGrad.addColorStop(0,   `rgba(120,115,100,${c.alpha * 1.4})`);
+          cGrad.addColorStop(0.6, `rgba(100,96,85,${c.alpha})`);
+          cGrad.addColorStop(1,   'rgba(0,0,0,0)');
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.beginPath();
+          ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+          ctx.fillStyle = cGrad;
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Terminator (subtle soft edge between lit & dark)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.clip();
+        const termGrad = ctx.createLinearGradient(x - r, y, x + r, y);
+        termGrad.addColorStop(0,   'rgba(0,0,0,0)');
+        termGrad.addColorStop(0.65,'rgba(0,0,0,0)');
+        termGrad.addColorStop(1,   'rgba(0,0,0,0.18)');
+        ctx.fillStyle = termGrad;
+        ctx.fillRect(x - r, y - r, r * 2, r * 2);
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      function tick() {
+        ctx.clearRect(0, 0, W, H);
+
+        // Glow pulse cycle
+        glowPulse += 0.006 * glowDir;
+        if (glowPulse > 1) glowDir = -1;
+        if (glowPulse < 0) glowDir =  1;
+
+        // Drift
+        moonX -= SPEED_X;
+        moonY += Math.sin(Date.now() * 0.00012) * SPEED_Y * 0.5;
+
+        // Wrap around: when fully off the left, reappear on the right
+        if (moonX < -MOON_R * 3.5) {
+          moonX = W + MOON_R * 3.5;
+          moonY = H * (0.10 + Math.random() * 0.18);
+        }
+
+        drawMoon(moonX, moonY, MOON_R, glowPulse);
+        requestAnimationFrame(tick);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      tick();
+    })();
+
+  </script>
+</body>
+</html>
