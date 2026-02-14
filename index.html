@@ -86,6 +86,7 @@ img { display: block; }
   pointer-events: none; z-index: 9999;
   transform: translate(-50%,-50%);
   box-shadow: 0 0 10px var(--a-glow);
+  will-change: left, top;
 }
 .cur-ring {
   width: 30px; height: 30px;
@@ -95,6 +96,7 @@ img { display: block; }
   pointer-events: none; z-index: 9998;
   transform: translate(-50%,-50%);
   transition: width .18s var(--ease), height .18s var(--ease), border-color .18s, opacity .18s;
+  will-change: left, top;
 }
 
 /* ═══════════════════════════════════════════
@@ -278,6 +280,7 @@ section { padding: 100px 0; }
   box-shadow: 0 8px 40px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.04) inset;
   transition: background .25s;
   position: relative;
+  will-change: background;
 }
 .nav-shell::after {
   content: '';
@@ -1321,6 +1324,8 @@ footer {
     0 0 28px 6px rgba(0,144,224,0.20);
   transition: width 0.08s linear;
   animation: progressPulse 2.4s ease-in-out infinite;
+  will-change: width;
+  contain: layout style paint;
 }
 @keyframes progressPulse {
   0%,100% { filter: brightness(1); }
@@ -2009,16 +2014,25 @@ footer {
 
 
 /* ═══════════════════════════════════════════
-   CURSOR
+   CURSOR (OPTIMIZED)
 ═══════════════════════════════════════════ */
 const dot  = document.getElementById('curDot');
 const ring = document.getElementById('curRing');
 let mx=0,my=0,rx=0,ry=0;
+let cursorTicking = false;
 
 document.addEventListener('mousemove', e => {
   mx=e.clientX; my=e.clientY;
-  dot.style.left=mx+'px'; dot.style.top=my+'px';
-});
+  
+  if (!cursorTicking) {
+    requestAnimationFrame(() => {
+      dot.style.left=mx+'px'; dot.style.top=my+'px';
+      cursorTicking = false;
+    });
+    cursorTicking = true;
+  }
+}, { passive: true });
+
 (function animRing(){
   rx+=(mx-rx)*.11; ry+=(my-ry)*.11;
   ring.style.left=rx+'px'; ring.style.top=ry+'px';
@@ -2072,17 +2086,26 @@ document.querySelectorAll('a,button').forEach(el=>{
     });
   });
 
-  // Scroll tint
+  // Scroll tint (throttled)
+  let navTicking = false;
   window.addEventListener('scroll',()=>{
-    navShell.style.background = scrollY>60 ? 'rgba(3,3,3,.93)' : 'rgba(5,5,5,.78)';
+    if (!navTicking) {
+      requestAnimationFrame(() => {
+        navShell.style.background = scrollY>60 ? 'rgba(3,3,3,.93)' : 'rgba(5,5,5,.78)';
+        navTicking = false;
+      });
+      navTicking = true;
+    }
   },{passive:true});
 })();
 
 /* ═══════════════════════════════════════════
-   SCROLL PROGRESS BAR
+   SCROLL PROGRESS BAR (OPTIMIZED)
 ═══════════════════════════════════════════ */
 (function(){
   const bar = document.getElementById('scrollProgress');
+  let ticking = false;
+  
   function updateProgress(){
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const docH      = document.documentElement.scrollHeight - window.innerHeight;
@@ -2091,8 +2114,16 @@ document.querySelectorAll('a,button').forEach(el=>{
     /* Show/hide the glowing tip only when scrolled */
     if(pct > 0.5) bar.classList.add('active');
     else          bar.classList.remove('active');
+    ticking = false;
   }
-  window.addEventListener('scroll', updateProgress, { passive: true });
+  
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateProgress);
+      ticking = true;
+    }
+  }, { passive: true });
+  
   updateProgress(); /* init on load in case of restored scroll position */
 })();
 
