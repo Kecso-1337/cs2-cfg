@@ -1211,6 +1211,19 @@ section { padding: 100px 0; }
   margin-bottom: 0;
 }
 .gear-specs { padding: 8px 18px 16px; }
+.gear-specs.gear-pills { display: flex; flex-wrap: wrap; gap: 7px; padding: 10px 18px 18px; }
+.pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--a);
+  border: 1px solid rgba(0,212,255,.22);
+  background: rgba(0,212,255,.07);
+}
 .spec-r {
   display: flex; justify-content: space-between; align-items: flex-start;
   padding: 7px 0;
@@ -1219,6 +1232,196 @@ section { padding: 100px 0; }
 .spec-r:last-child { border-bottom: none; }
 .spec-k { font-size: 12.5px; color: var(--txt2); flex-shrink: 0; margin-right: 16px; }
 .spec-v { font-size: 12.5px; font-weight: 600; color: var(--txt); text-align: right; }
+
+/* ═══════════════════════════════════════════
+   PERIPHERAL SHOWCASE — 3D BLUEPRINT GALLERY
+═══════════════════════════════════════════ */
+.peri-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 0;
+}
+.peri-card {
+  position: relative;
+  border-radius: 18px;
+  background: rgba(255,255,255,.028);
+  border: 1px solid rgba(0,201,255,.12);
+  overflow: hidden;
+  cursor: default;
+  aspect-ratio: 1 / 1.08;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 0 22px;
+  transition: border-color .3s, box-shadow .3s;
+  will-change: transform;
+  transform-style: preserve-3d;
+  transform: perspective(800px) rotateX(0deg) rotateY(0deg);
+}
+/* deep inner glow */
+.peri-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 30%, rgba(0,201,255,.08) 0%, transparent 70%);
+  opacity: 1;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+.peri-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 20%, rgba(0,201,255,.18) 0%, transparent 55%);
+  opacity: 0;
+  transition: opacity .4s;
+  pointer-events: none;
+}
+.peri-card:hover {
+  border-color: rgba(0,201,255,.38);
+  box-shadow:
+    0 0 0 1px rgba(0,201,255,.1),
+    0 12px 60px rgba(0,201,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+.peri-card:hover::after { opacity: 1; }
+
+/* Corner brackets — blueprint feel */
+.peri-card .brk {
+  position: absolute;
+  width: 14px; height: 14px;
+  border-color: rgba(0,201,255,.35);
+  border-style: solid;
+  border-width: 0;
+  transition: all .3s;
+}
+.peri-card:hover .brk { border-color: rgba(0,201,255,.7); }
+.peri-card .brk-tl { top: 10px; left: 10px; border-top-width: 1.5px; border-left-width: 1.5px; border-top-left-radius: 3px; }
+.peri-card .brk-tr { top: 10px; right: 10px; border-top-width: 1.5px; border-right-width: 1.5px; border-top-right-radius: 3px; }
+.peri-card .brk-bl { bottom: 10px; left: 10px; border-bottom-width: 1.5px; border-left-width: 1.5px; border-bottom-left-radius: 3px; }
+.peri-card .brk-br { bottom: 10px; right: 10px; border-bottom-width: 1.5px; border-right-width: 1.5px; border-bottom-right-radius: 3px; }
+
+/* Device type label — top left */
+.peri-type {
+  position: absolute;
+  top: 18px; left: 18px;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(0,201,255,.45);
+  transition: color .3s;
+}
+.peri-card:hover .peri-type { color: rgba(0,201,255,.75); }
+
+/* SVG Blueprint Icon — center */
+.peri-icon-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -58%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), filter .3s;
+}
+.peri-card:hover .peri-icon-wrap {
+  transform: translate(-50%, -62%);
+}
+.peri-icon-wrap svg {
+  filter:
+    drop-shadow(0 0 6px rgba(0,201,255,.55))
+    drop-shadow(0 0 18px rgba(0,201,255,.25));
+  transition: filter .3s;
+}
+.peri-card:hover .peri-icon-wrap svg {
+  filter:
+    drop-shadow(0 0 10px rgba(0,201,255,.9))
+    drop-shadow(0 0 30px rgba(0,201,255,.45));
+}
+
+/* Scan line — animated */
+.peri-scan {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,201,255,.5), transparent);
+  top: 0;
+  opacity: 0;
+  transition: opacity .3s;
+  animation: periScan 2.8s linear infinite;
+  animation-play-state: paused;
+}
+.peri-card:hover .peri-scan { opacity: 1; animation-play-state: running; }
+@keyframes periScan {
+  0%   { top: 10%; }
+  100% { top: 90%; }
+}
+
+/* Model name */
+.peri-name {
+  font-size: 1.6rem; font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--txt);
+  text-align: center;
+  padding: 0 14px;
+  line-height: 1.25;
+  position: relative;
+  z-index: 2;
+  transition: color .3s, text-shadow .3s;
+  text-shadow:
+    0 0 18px rgba(0,201,255,0.35),
+    0 0 40px rgba(0,201,255,0.15);
+}
+.peri-card:hover .peri-name {
+  color: #fff;
+  text-shadow:
+    0 0 12px rgba(0,201,255,0.7),
+    0 0 35px rgba(0,201,255,0.35),
+    0 0 70px rgba(0,201,255,0.15);
+}
+
+/* Hover-reveal badge strip */
+.peri-badges {
+  position: absolute;
+  bottom: 78px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .35s, transform .35s cubic-bezier(.34,1.4,.64,1);
+  pointer-events: none;
+  z-index: 3;
+  padding: 0 10px;
+}
+.peri-card:hover .peri-badges {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0px);
+}
+.peri-badge {
+  font-size: 9px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--a);
+  border: 1px solid rgba(0,201,255,.3);
+  background: rgba(0,10,20,.75);
+  backdrop-filter: blur(8px);
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+@media(max-width:900px) {
+  .peri-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media(max-width:520px) {
+  .peri-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .peri-name { font-size: 1.15rem; }
+}
 
 /* Monitor quick stats */
 .mon-stats {
@@ -2054,7 +2257,7 @@ footer {
 ═══════════════════════════════════════════ -->
 <nav id="navbar">
   <div class="nav-shell">
-    <a href="#hero" class="nav-brand">INTERFACE<em>.</em></a>
+      <a href="#hero" class="nav-brand">OVERVIEW<em>.</em></a>
 
     <ul class="nav-links">
       <li><a href="#hero"      data-s="hero">About Me</a></li>
@@ -2495,13 +2698,7 @@ footer {
           <span class="gear-lbl">Monitor</span>
         </div>
         <div class="gear-name">Zowie XL2546K</div>
-        <div class="mon-stats">
-          <div class="mon-stat"><div class="mon-slbl">Refresh Rate</div><div class="mon-sval">240</div><div class="mon-sunit">Hz</div></div>
-          <div class="mon-stat"><div class="mon-slbl">Resolution</div><div class="mon-sval">1920x1080</div><div class="mon-sunit">Stretched</div></div>
-          <div class="mon-stat"><div class="mon-slbl">Display Panel</div><div class="mon-sval">TN</div><div class="mon-sunit">Fast TN</div></div>
-          <div class="mon-stat"><div class="mon-slbl">Response</div><div class="mon-sval">0.5</div><div class="mon-sunit">ms GTG</div></div>
-          <div class="mon-stat"><div class="mon-slbl">Size</div><div class="mon-sval">24.5"</div><div class="mon-sunit">Inch</div></div>
-        </div>
+
         <div class="mon-osd">
           <div class="osd-grp">Motion &amp; Clarity</div>
           <div class="osd-row"><span class="osd-k">DyAc+</span><div class="osd-r"><span class="osd-v prm">Premium</span></div></div>
@@ -2591,49 +2788,246 @@ footer {
         </div>
       </div>
 
-      <!-- Mouse -->
-      <div class="gear-card glass">
-        <div class="gear-head"><div class="gear-icon"><i class="fas fa-mouse-pointer"></i></div><span class="gear-lbl">Mouse</span></div>
-        <div class="gear-name">Logitech G Pro Superlight 2</div>
-        <div class="gear-specs">
-          <div class="spec-r"><span class="spec-k">Sensor</span><span class="spec-v">HERO 2</span></div>
-          <div class="spec-r"><span class="spec-k">Weight</span><span class="spec-v">60g</span></div>
-          <div class="spec-r"><span class="spec-k">Switch Type</span><span class="spec-v">LIGHTFORCE Hybrid Switches</span></div>
-        </div>
-      </div>
+      <!-- ══ PERIPHERAL SHOWCASE GALLERY ══ -->
+      <div class="peri-grid" style="grid-column:1/-1;" id="periGrid">
 
-      <!-- Keyboard -->
-      <div class="gear-card glass">
-        <div class="gear-head"><div class="gear-icon"><i class="fas fa-keyboard"></i></div><span class="gear-lbl">Keyboard</span></div>
-        <div class="gear-name">SteelSeries Apex Pro Mini</div>
-        <div class="gear-specs">
-          <div class="spec-r"><span class="spec-k">Switch Type</span><span class="spec-v">OmniPoint 2.0 magnetic (Hall-effect) switches</span></div>
-          <div class="spec-r"><span class="spec-k">Form Factor</span><span class="spec-v">60%</span></div>
-          <div class="spec-r"><span class="spec-k">Polling Rate</span><span class="spec-v">1000 Hz</span></div>
+        <!-- MOUSE -->
+        <div class="peri-card" data-tilt>
+          <span class="brk brk-tl"></span><span class="brk brk-tr"></span>
+          <span class="brk brk-bl"></span><span class="brk brk-br"></span>
+          <div class="peri-scan"></div>
+          <span class="peri-type">Mouse</span>
+          <div class="peri-icon-wrap">
+            <!-- Sleek FPS mouse silhouette — blueprint wireframe -->
+            <svg width="110" height="130" viewBox="0 0 110 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Body outline -->
+              <path d="M30 55 C28 35 32 18 55 14 C78 18 82 35 80 55 L78 95 C77 108 65 118 55 118 C45 118 33 108 32 95 Z"
+                stroke="rgba(0,201,255,0.7)" stroke-width="1.2" fill="rgba(0,201,255,0.04)"/>
+              <!-- Center spine line -->
+              <line x1="55" y1="14" x2="55" y2="118" stroke="rgba(0,201,255,0.18)" stroke-width="0.8" stroke-dasharray="3 4"/>
+              <!-- Left button split -->
+              <path d="M30 55 L30 42 C30 28 38 18 55 14 L55 57"
+                stroke="rgba(0,201,255,0.6)" stroke-width="1.1" fill="rgba(0,201,255,0.06)"/>
+              <!-- Right button split -->
+              <path d="M80 55 L80 42 C80 28 72 18 55 14 L55 57"
+                stroke="rgba(0,201,255,0.6)" stroke-width="1.1" fill="rgba(0,201,255,0.04)"/>
+              <!-- Scroll wheel -->
+              <rect x="48" y="22" width="14" height="24" rx="6"
+                stroke="rgba(0,201,255,0.8)" stroke-width="1.2" fill="rgba(0,201,255,0.1)"/>
+              <line x1="48" y1="30" x2="62" y2="30" stroke="rgba(0,201,255,0.4)" stroke-width="0.7"/>
+              <line x1="48" y1="34" x2="62" y2="34" stroke="rgba(0,201,255,0.4)" stroke-width="0.7"/>
+              <line x1="48" y1="38" x2="62" y2="38" stroke="rgba(0,201,255,0.4)" stroke-width="0.7"/>
+              <!-- Side buttons left -->
+              <rect x="24" y="60" width="7" height="14" rx="3"
+                stroke="rgba(0,201,255,0.55)" stroke-width="1" fill="rgba(0,201,255,0.08)"/>
+              <!-- Sensor dot -->
+              <circle cx="55" cy="100" r="3" stroke="rgba(0,201,255,0.9)" stroke-width="1" fill="rgba(0,201,255,0.25)"/>
+              <circle cx="55" cy="100" r="6" stroke="rgba(0,201,255,0.3)" stroke-width="0.6" fill="none"/>
+              <!-- Grid dots -->
+              <circle cx="40" cy="75" r="1" fill="rgba(0,201,255,0.3)"/>
+              <circle cx="55" cy="78" r="1" fill="rgba(0,201,255,0.3)"/>
+              <circle cx="70" cy="75" r="1" fill="rgba(0,201,255,0.3)"/>
+            </svg>
+          </div>
+          <div class="peri-badges">
+            <span class="peri-badge">HERO 2</span>
+            <span class="peri-badge">60g</span>
+            <span class="peri-badge">LIGHTFORCE</span>
+          </div>
+          <div class="peri-name">Logitech G Pro Superlight 2</div>
         </div>
-      </div>
 
-      <!-- Headset -->
-      <div class="gear-card glass">
-        <div class="gear-head"><div class="gear-icon"><i class="fas fa-headphones"></i></div><span class="gear-lbl">Headset</span></div>
-        <div class="gear-name">Logitech G Pro X Gaming</div>
-        <div class="gear-specs">
-          <div class="spec-r"><span class="spec-k">Connection</span><span class="spec-v">USB or 3.5 mm with included adapters/cables</span></div>
-          <div class="spec-r"><span class="spec-k">Driver Size</span><span class="spec-v">50 mm hybrid mesh PRO-G drivers</span></div>
-          <div class="spec-r"><span class="spec-k">Mic</span><span class="spec-v">Blue VO!CE Technology</span></div>
+        <!-- KEYBOARD -->
+        <div class="peri-card" data-tilt>
+          <span class="brk brk-tl"></span><span class="brk brk-tr"></span>
+          <span class="brk brk-bl"></span><span class="brk brk-br"></span>
+          <div class="peri-scan"></div>
+          <span class="peri-type">Keyboard</span>
+          <div class="peri-icon-wrap">
+            <!-- 60% compact keyboard layout — blueprint wireframe -->
+            <svg width="140" height="100" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Chassis -->
+              <rect x="4" y="16" width="132" height="70" rx="7"
+                stroke="rgba(0,201,255,0.65)" stroke-width="1.2" fill="rgba(0,201,255,0.04)"/>
+              <!-- Row 1 — Number row: 12 keys -->
+              <g stroke="rgba(0,201,255,0.55)" stroke-width="0.9" fill="rgba(0,201,255,0.07)">
+                <rect x="10" y="23" width="10" height="10" rx="2"/>
+                <rect x="22" y="23" width="10" height="10" rx="2"/>
+                <rect x="34" y="23" width="10" height="10" rx="2"/>
+                <rect x="46" y="23" width="10" height="10" rx="2"/>
+                <rect x="58" y="23" width="10" height="10" rx="2"/>
+                <rect x="70" y="23" width="10" height="10" rx="2"/>
+                <rect x="82" y="23" width="10" height="10" rx="2"/>
+                <rect x="94" y="23" width="10" height="10" rx="2"/>
+                <rect x="106" y="23" width="10" height="10" rx="2"/>
+                <rect x="118" y="23" width="12" height="10" rx="2"/>
+              </g>
+              <!-- Row 2 — QWERTY: tab + 11 keys -->
+              <g stroke="rgba(0,201,255,0.55)" stroke-width="0.9" fill="rgba(0,201,255,0.07)">
+                <rect x="10" y="35" width="15" height="10" rx="2"/>
+                <rect x="27" y="35" width="10" height="10" rx="2"/>
+                <rect x="39" y="35" width="10" height="10" rx="2"/>
+                <rect x="51" y="35" width="10" height="10" rx="2"/>
+                <rect x="63" y="35" width="10" height="10" rx="2"/>
+                <rect x="75" y="35" width="10" height="10" rx="2"/>
+                <rect x="87" y="35" width="10" height="10" rx="2"/>
+                <rect x="99" y="35" width="10" height="10" rx="2"/>
+                <rect x="111" y="35" width="10" height="10" rx="2"/>
+                <rect x="123" y="35" width="7" height="10" rx="2"/>
+              </g>
+              <!-- Row 3 — ASDF: caps + 11 + enter -->
+              <g stroke="rgba(0,201,255,0.55)" stroke-width="0.9" fill="rgba(0,201,255,0.07)">
+                <rect x="10" y="47" width="18" height="10" rx="2"/>
+                <rect x="30" y="47" width="10" height="10" rx="2"/>
+                <rect x="42" y="47" width="10" height="10" rx="2"/>
+                <rect x="54" y="47" width="10" height="10" rx="2"/>
+                <rect x="66" y="47" width="10" height="10" rx="2"/>
+                <rect x="78" y="47" width="10" height="10" rx="2"/>
+                <rect x="90" y="47" width="10" height="10" rx="2"/>
+                <rect x="102" y="47" width="10" height="10" rx="2"/>
+                <rect x="114" y="47" width="10" height="10" rx="2"/>
+                <!-- Enter key — tall -->
+                <rect x="10" y="47" width="1" height="1" rx="0" fill="none" stroke="none"/>
+                <rect x="126" y="47" width="4" height="22" rx="2" stroke="rgba(0,201,255,0.8)" fill="rgba(0,201,255,0.12)"/>
+              </g>
+              <!-- Row 4 — ZXCV: shift + 10 -->
+              <g stroke="rgba(0,201,255,0.55)" stroke-width="0.9" fill="rgba(0,201,255,0.07)">
+                <rect x="10" y="59" width="22" height="10" rx="2"/>
+                <rect x="34" y="59" width="10" height="10" rx="2"/>
+                <rect x="46" y="59" width="10" height="10" rx="2"/>
+                <rect x="58" y="59" width="10" height="10" rx="2"/>
+                <rect x="70" y="59" width="10" height="10" rx="2"/>
+                <rect x="82" y="59" width="10" height="10" rx="2"/>
+                <rect x="94" y="59" width="10" height="10" rx="2"/>
+                <rect x="106" y="59" width="10" height="10" rx="2"/>
+                <rect x="118" y="59" width="8" height="10" rx="2" stroke="rgba(0,201,255,0.8)" fill="rgba(0,201,255,0.1)"/>
+              </g>
+              <!-- Row 5 — Bottom: ctrl, fn, alt, SPACE, alt, fn -->
+              <g stroke="rgba(0,201,255,0.55)" stroke-width="0.9" fill="rgba(0,201,255,0.07)">
+                <rect x="10" y="71" width="12" height="10" rx="2"/>
+                <rect x="24" y="71" width="10" height="10" rx="2"/>
+                <rect x="36" y="71" width="10" height="10" rx="2"/>
+                <!-- Spacebar — highlighted -->
+                <rect x="48" y="71" width="46" height="10" rx="2" stroke="rgba(0,201,255,0.85)" fill="rgba(0,201,255,0.13)"/>
+                <rect x="96" y="71" width="10" height="10" rx="2"/>
+                <rect x="108" y="71" width="10" height="10" rx="2"/>
+                <rect x="120" y="71" width="10" height="10" rx="2"/>
+              </g>
+            </svg>
+          </div>
+          <div class="peri-badges">
+            <span class="peri-badge">OmniPoint 2.0</span>
+            <span class="peri-badge">60%</span>
+          </div>
+          <div class="peri-name">SteelSeries Apex Pro Mini</div>
         </div>
-      </div>
 
-      <!-- Mousepad -->
-      <div class="gear-card glass">
-        <div class="gear-head"><div class="gear-icon"><i class="fas fa-expand"></i></div><span class="gear-lbl">Mousepad</span></div>
-        <div class="gear-name">SteelSeries QCK Heavy XXL</div>
-        <div class="gear-specs">
-          <div class="spec-r"><span class="spec-k">Size</span><span class="spec-v">900 × 400 mm</span></div>
-          <div class="spec-r"><span class="spec-k">Surface</span><span class="spec-v">Classic micro-woven cloth, balanced glide and control</span></div>
-          <div class="spec-r"><span class="spec-k">Thickness</span><span class="spec-v">4 mm</span></div>
+        <!-- HEADSET -->
+        <div class="peri-card" data-tilt>
+          <span class="brk brk-tl"></span><span class="brk brk-tr"></span>
+          <span class="brk brk-bl"></span><span class="brk brk-br"></span>
+          <div class="peri-scan"></div>
+          <span class="peri-type">Headset</span>
+          <div class="peri-icon-wrap">
+            <!-- Headset silhouette — blueprint wireframe -->
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Headband arc -->
+              <path d="M20 65 C20 30 100 30 100 65"
+                stroke="rgba(0,201,255,0.75)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+              <!-- Headband padding inner arc -->
+              <path d="M27 65 C27 38 93 38 93 65"
+                stroke="rgba(0,201,255,0.25)" stroke-width="0.8" fill="none" stroke-dasharray="4 3"/>
+              <!-- Left ear cup -->
+              <rect x="8" y="58" width="22" height="32" rx="11"
+                stroke="rgba(0,201,255,0.75)" stroke-width="1.2" fill="rgba(0,201,255,0.07)"/>
+              <!-- Left driver ring -->
+              <circle cx="19" cy="74" r="8"
+                stroke="rgba(0,201,255,0.5)" stroke-width="0.9" fill="rgba(0,201,255,0.06)"/>
+              <circle cx="19" cy="74" r="4"
+                stroke="rgba(0,201,255,0.8)" stroke-width="1" fill="rgba(0,201,255,0.12)"/>
+              <!-- Right ear cup -->
+              <rect x="90" y="58" width="22" height="32" rx="11"
+                stroke="rgba(0,201,255,0.75)" stroke-width="1.2" fill="rgba(0,201,255,0.07)"/>
+              <!-- Right driver ring -->
+              <circle cx="101" cy="74" r="8"
+                stroke="rgba(0,201,255,0.5)" stroke-width="0.9" fill="rgba(0,201,255,0.06)"/>
+              <circle cx="101" cy="74" r="4"
+                stroke="rgba(0,201,255,0.8)" stroke-width="1" fill="rgba(0,201,255,0.12)"/>
+              <!-- Mic boom arm -->
+              <path d="M8 82 C0 90 2 102 8 106"
+                stroke="rgba(0,201,255,0.6)" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+              <!-- Mic capsule -->
+              <rect x="5" y="103" width="7" height="12" rx="3.5"
+                stroke="rgba(0,201,255,0.85)" stroke-width="1.1" fill="rgba(0,201,255,0.15)"/>
+              <!-- Sound wave dots on mic -->
+              <circle cx="16" cy="107" r="1" fill="rgba(0,201,255,0.5)"/>
+              <circle cx="20" cy="104" r="1" fill="rgba(0,201,255,0.35)"/>
+              <circle cx="24" cy="101" r="1" fill="rgba(0,201,255,0.2)"/>
+              <!-- Adjustment slider marks -->
+              <line x1="19" y1="58" x2="20" y2="62" stroke="rgba(0,201,255,0.45)" stroke-width="1"/>
+              <line x1="101" y1="58" x2="100" y2="62" stroke="rgba(0,201,255,0.45)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="peri-badges">
+            <span class="peri-badge">50mm PRO-G</span>
+            <span class="peri-badge">Blue VO!CE</span>
+          </div>
+          <div class="peri-name">Logitech G Pro X Gaming</div>
         </div>
-      </div>
+
+        <!-- MOUSEPAD -->
+        <div class="peri-card" data-tilt>
+          <span class="brk brk-tl"></span><span class="brk brk-tr"></span>
+          <span class="brk brk-bl"></span><span class="brk brk-br"></span>
+          <div class="peri-scan"></div>
+          <span class="peri-type">Mousepad</span>
+          <div class="peri-icon-wrap">
+            <!-- XXL Mousepad — top-down blueprint perspective -->
+            <svg width="140" height="100" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Pad outline with thick rounded border -->
+              <rect x="6" y="14" width="128" height="72" rx="8"
+                stroke="rgba(0,201,255,0.7)" stroke-width="1.3" fill="rgba(0,201,255,0.04)"/>
+              <!-- Inner surface texture lines -->
+              <line x1="6" y1="28" x2="134" y2="28" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="6" y1="42" x2="134" y2="42" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="6" y1="56" x2="134" y2="56" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="6" y1="70" x2="134" y2="70" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="25" y1="14" x2="25" y2="86" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="44" y1="14" x2="44" y2="86" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="63" y1="14" x2="63" y2="86" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="82" y1="14" x2="82" y2="86" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="101" y1="14" x2="101" y2="86" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <line x1="120" y1="14" x2="120" y2="86" stroke="rgba(0,201,255,0.1)" stroke-width="0.6"/>
+              <!-- Stitching border -->
+              <rect x="10" y="18" width="120" height="64" rx="6"
+                stroke="rgba(0,201,255,0.2)" stroke-width="0.7" stroke-dasharray="4 3" fill="none"/>
+              <!-- SteelSeries logo placeholder — center mark -->
+              <circle cx="70" cy="50" r="10" stroke="rgba(0,201,255,0.4)" stroke-width="0.9" fill="rgba(0,201,255,0.06)"/>
+              <path d="M64 50 L67 47 L73 47 L76 50 L73 53 L67 53 Z"
+                stroke="rgba(0,201,255,0.7)" stroke-width="0.9" fill="rgba(0,201,255,0.12)"/>
+              <!-- Dimension annotation lines -->
+              <line x1="6" y1="8" x2="134" y2="8" stroke="rgba(0,201,255,0.3)" stroke-width="0.7"/>
+              <line x1="6" y1="6" x2="6" y2="10" stroke="rgba(0,201,255,0.3)" stroke-width="0.7"/>
+              <line x1="134" y1="6" x2="134" y2="10" stroke="rgba(0,201,255,0.3)" stroke-width="0.7"/>
+              <text x="70" y="7" text-anchor="middle" font-size="5.5" fill="rgba(0,201,255,0.5)" font-family="monospace" letter-spacing="1">900mm</text>
+              <!-- Height annotation -->
+              <line x1="138" y1="14" x2="138" y2="86" stroke="rgba(0,201,255,0.3)" stroke-width="0.7"/>
+              <line x1="136" y1="14" x2="140" y2="14" stroke="rgba(0,201,255,0.3)" stroke-width="0.7"/>
+              <line x1="136" y1="86" x2="140" y2="86" stroke="rgba(0,201,255,0.3)" stroke-width="0.7"/>
+              <text x="139" y="52" text-anchor="start" font-size="5.5" fill="rgba(0,201,255,0.5)" font-family="monospace" letter-spacing="1" transform="rotate(90 139 52)">400mm</text>
+              <!-- Mouse ghost on pad -->
+              <path d="M88 36 C87 30 90 25 96 24 C102 25 105 30 104 36 L103 50 C103 55 99 59 96 59 C93 59 89 55 89 50 Z"
+                stroke="rgba(0,201,255,0.35)" stroke-width="0.9" fill="rgba(0,201,255,0.05)" stroke-dasharray="2 2"/>
+            </svg>
+          </div>
+          <div class="peri-badges">
+            <span class="peri-badge">900 × 400</span>
+            <span class="peri-badge">4mm</span>
+          </div>
+          <div class="peri-name">SteelSeries QCK Heavy XXL</div>
+        </div>
+
+      </div><!-- /peri-grid -->
 
     </div>
   </div>
@@ -2673,7 +3067,6 @@ footer {
           <div class="pc-info">
             <div class="pc-lbl">Water Cooler</div>
             <div class="pc-nm">Arctic Liquid Freezer II 420</div>
-            <div class="pc-det">420 mm · Triple 140 mm PWM</div>
             <span class="pc-badge">Arctic</span>
           </div>
           <span class="pc-depth">Z+18</span>
@@ -2689,7 +3082,6 @@ footer {
           <div class="pc-info">
             <div class="pc-lbl">Processor</div>
             <div class="pc-nm">Intel® Core™ i9-11900K</div>
-            <div class="pc-det">8 Cores · Up to 5.3 GHz · LGA1200</div>
             <span class="pc-badge">Intel</span>
           </div>
           <span class="pc-depth">Z+40</span>
@@ -2703,7 +3095,6 @@ footer {
           <div class="pc-info">
             <div class="pc-lbl">Memory</div>
             <div class="pc-nm">Kingston FURY Beast 32 GB DDR4</div>
-            <div class="pc-det">2×16 GB · 3200 MHz CL15 · XMP 2.0</div>
             <span class="pc-badge">Kingston Fury Beast</span>
           </div>
           <span class="pc-depth">Z+28</span>
@@ -2718,8 +3109,7 @@ footer {
           <div class="pc-icon"><i class="fas fa-hdd"></i></div>
           <div class="pc-info">
             <div class="pc-lbl">Primary Storage</div>
-            <div class="pc-nm">WD BLACK SN850X 1TB M.2</div>
-            <div class="pc-det">PCIe 4.0 ×4 · M.2 2280</div>
+            <div class="pc-nm">Western Digital SN850X 1TB M.2</div>
             <span class="pc-badge">Western Digital</span>
           </div>
           <span class="pc-depth">Z+70</span>
@@ -2734,7 +3124,7 @@ footer {
               <div class="pc-hud-rows">
                 <div class="pc-hud-bar-wrap">
                   <div class="pc-hud-bar-meta">
-                    <span>Seq. Read</span><span style="color:var(--a)">7 300 MB/s</span>
+                    <span>READ</span><span style="color:var(--a)">7300 MB/s</span>
                   </div>
                   <div class="pc-hud-bar-track">
                     <div class="pc-hud-bar-fill hbf-read" data-w="97"></div>
@@ -2742,7 +3132,7 @@ footer {
                 </div>
                 <div class="pc-hud-bar-wrap">
                   <div class="pc-hud-bar-meta">
-                    <span>Seq. Write</span><span style="color:#0090e0">6 300 MB/s</span>
+                    <span>WRITE</span><span style="color:#0090e0">6300 MB/s</span>
                   </div>
                   <div class="pc-hud-bar-track">
                     <div class="pc-hud-bar-fill hbf-write" data-w="84"></div>
@@ -2761,7 +3151,6 @@ footer {
           <div class="pc-info">
             <div class="pc-lbl">Motherboard</div>
             <div class="pc-nm">MSI Z590-A PRO</div>
-            <div class="pc-det">LGA1200 · Intel Z590 Chipset</div>
             <span class="pc-badge">MSI</span>
           </div>
           <span class="pc-depth">Z+12</span>
@@ -2777,7 +3166,6 @@ footer {
           <div class="pc-info">
             <div class="pc-lbl">Graphics Card</div>
             <div class="pc-nm">RTX™ 3080 GAMING X TRIO 10G</div>
-            <div class="pc-det">10 GB GDDR6X · Ampere Architecture</div>
             <span class="pc-badge">Nvidia</span>
           </div>
           <span class="pc-depth">Z+55</span>
@@ -2791,7 +3179,6 @@ footer {
           <div class="pc-info">
             <div class="pc-lbl">Power Supply</div>
             <div class="pc-nm">ASUS Prime 750W Gold</div>
-            <div class="pc-det">80 PLUS Gold · Fully Modular</div>
             <span class="pc-badge">ASUS</span>
           </div>
           <span class="pc-depth">Z+22</span>
@@ -2810,7 +3197,7 @@ footer {
   <div class="wrap">
     <div class="foot-inner">
       <div class="foot-brand">Kecso<em>.</em></div>
-      <div class="foot-note">Thanks for visiting. &nbsp;·&nbsp; Last update: 2026.02.16</div>
+      <div class="foot-note">Thanks for visiting. &nbsp;·&nbsp; Last update: 2026.02.14</div>
       <div class="foot-note">Settings may change without notice</div>
     </div>
   </div>
@@ -3111,10 +3498,35 @@ function copyToClipboard(text,el){
   hud.addEventListener('mouseenter', ()=>clearTimeout(hideTimer));
   hud.addEventListener('mouseleave', hideHud);
 })();
+
+/* ═══════════════════════════════════════════
+   PERIPHERAL CARDS — 3D MAGNETIC TILT
+═══════════════════════════════════════════ */
+(function(){
+  const cards = document.querySelectorAll('.peri-card[data-tilt]');
+  const MAX_TILT = 12; // degrees
+
+  cards.forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top  + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width  / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      const rotY =  dx * MAX_TILT;
+      const rotX = -dy * MAX_TILT;
+      card.style.transform =
+        `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.03,1.03,1.03)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform =
+        'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+    });
+  });
+})();
+
 </script>
-
-
 
 </body>
 </html>
-
